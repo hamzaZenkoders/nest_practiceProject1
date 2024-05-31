@@ -21,7 +21,7 @@ let UsersService = class UsersService {
                 "id": 2,
                 "name": "Ervin Howell",
                 "email": "Shanna@melissa.tv",
-                "role": "INTERN",
+                "role": "Student",
             },
             {
                 "id": 3,
@@ -39,18 +39,23 @@ let UsersService = class UsersService {
                 "id": 5,
                 "name": "Chelsey Dietrich",
                 "email": "Lucio_Hettinger@annie.ca",
-                "role": "ADMIN",
+                "role": "Student",
             }
         ];
     }
     findAll(role) {
         if (role) {
-            return this.users.filter((user) => user.role === role);
+            const rolesArray = this.users.filter((user) => user.role === role);
+            if (rolesArray.length === 0)
+                throw new common_1.NotFoundException("User Role Not Found");
+            return rolesArray;
         }
         return this.users;
     }
     findOne(id) {
         const user = this.users.filter((user) => user.id === id);
+        if (user.length === 0)
+            throw new common_1.NotFoundException("User Not Found");
         return user;
     }
     create(createUserDto) {

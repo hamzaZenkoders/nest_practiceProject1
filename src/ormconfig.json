@@ -1,0 +1,10 @@
+{
+    "type":"postgres",
+    "host" : "localhost",
+    "port" : 5432,
+    "username" : "postgres",
+    "password": "dxtx100",
+    "database": "postgres",
+    "entities": [],
+    "synchronize": true
+  }

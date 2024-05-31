@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user-dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 
@@ -16,7 +16,7 @@ export class UsersService {
             "id": 2,
             "name": "Ervin Howell",
             "email": "Shanna@melissa.tv",
-            "role": "INTERN",
+            "role": "Student",
         },
         {
             "id": 3,
@@ -34,13 +34,17 @@ export class UsersService {
             "id": 5,
             "name": "Chelsey Dietrich",
             "email": "Lucio_Hettinger@annie.ca",
-            "role": "ADMIN",
+            "role": "Student",
         }
     ]
 
     findAll(role?: 'Teacher' | 'Student' | 'Admin'){
         if(role){
-            return this.users.filter((user)=>user.role === role);
+           const rolesArray =  this.users.filter((user)=>user.role === role);
+
+           if(rolesArray.length === 0) throw new NotFoundException("User Role Not Found")
+
+            return rolesArray;
         }
 
         return this.users;
@@ -48,6 +52,11 @@ export class UsersService {
 
     findOne(id: number){
        const user = this.users.filter((user)=>user.id === id);
+
+      // console.log(user.length);
+
+       if(user.length === 0) throw new NotFoundException("User Not Found");
+
        return user;
     }
 
