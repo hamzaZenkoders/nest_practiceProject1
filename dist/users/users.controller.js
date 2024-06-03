@@ -17,7 +17,7 @@ const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user-dto");
 const login_user_dto_1 = require("./dto/login-user-dto");
-const auth_guard_1 = require("../auth/auth.guard");
+const authentication_guards_1 = require("./guards/authentication.guards");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -29,12 +29,16 @@ let UsersController = class UsersController {
         return this.usersService.register(user);
     }
     signIn(loginInUserDto) {
-        return this.usersService.logIn(loginInUserDto);
+        const user = this.usersService.logIn(loginInUserDto);
+        if (!user) {
+            throw new common_1.UnauthorizedException();
+        }
+        return user;
     }
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.UseGuards)(authentication_guards_1.AuthenticationGuard),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),

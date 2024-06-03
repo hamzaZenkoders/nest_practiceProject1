@@ -39,17 +39,18 @@ let UsersService = class UsersService {
     async logIn(loginInUserDto) {
         const UserFound = await this.userRepository.findOne({ where: { email: loginInUserDto.email } });
         if (!UserFound) {
-            throw new common_1.UnauthorizedException();
+            return null;
         }
         const passwordMatched = await bcrypt.compare(loginInUserDto.password, UserFound.password);
         if (!passwordMatched) {
             throw new common_1.UnauthorizedException();
         }
-        const token = this.jwtSerice.sign({ id: UserFound.name });
+        const { password, ...user } = UserFound;
+        const token = this.jwtSerice.sign({ user });
         return { token };
     }
     async findOne(id) {
-        return this.userRepository.findOne(id);
+        return this.userRepository.findOne({ where: { id } });
     }
 };
 exports.UsersService = UsersService;

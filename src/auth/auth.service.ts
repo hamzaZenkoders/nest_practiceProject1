@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entity/user.entity';
 import { Repository } from 'typeorm';
-import { SignUpDto } from './dto/sign-up-dto';
+import { AuthPayloadDto } from './dto/auth-dto';
 import * as bcrypt from 'bcrypt';
 
 
@@ -16,7 +16,7 @@ export class AuthService {
     )
     {}
 
-    async signUp(signUpDto: SignUpDto){
+   /*  async signUp(signUpDto: SignUpDto){
          const {name,email,password} = signUpDto;
          
          const hashedPassword = await bcrypt.hash(password,10);
@@ -33,5 +33,13 @@ export class AuthService {
 
 
     }
-
+ */
+   /*  aysnc validateUser({ email, password }: AuthPayloadDto) {
+        const findUser =  await this.userRepository.find({ where: { email: email } });
+        if (!findUser) return null;
+        if (password === findUser.password) {
+          const { password, ...user } = findUser;
+          return this.jwtService.sign(user);
+        }
+    } */
 }

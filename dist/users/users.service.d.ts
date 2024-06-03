@@ -11,5 +11,5 @@ export declare class UsersService {
     logIn(loginInUserDto: LoginInUserDto): Promise<{
         token: string;
     }>;
-    findOne(id: any): Promise<User>;
+    findOne(id: number): Promise<User>;
 }

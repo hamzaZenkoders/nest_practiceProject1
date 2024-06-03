@@ -1,9 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, ParseIntPipe, ValidationPipe, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, ParseIntPipe, ValidationPipe, HttpException, HttpStatus, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user-dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { LoginInUserDto } from './dto/login-user-dto';
-import { AuthGuard } from 'src/auth/auth.guard';
+//Simport { AuthGuard } from 'src/auth/auth.guard';
+import { Request } from 'express';
+import { AuthenticationGuard } from './guards/authentication.guards';
+//import { LocalGuard } from './guards/authentication.guards';
 
 
 @Controller('users')  //it is defining the route i.e /users
@@ -37,7 +40,9 @@ export class UsersController {
          return this.usersService.delete(id);
      }
  */
-     @UseGuards(AuthGuard)
+     //@UseGuards(AuthGuard)
+
+     @UseGuards(AuthenticationGuard)
      @Get(':id')
      findOne(@Param('id', ParseIntPipe) id: number){
       return this.usersService.findOne(id);
@@ -48,8 +53,15 @@ export class UsersController {
      }
 
      @Post('/signIn')
+
      signIn(@Body() loginInUserDto: LoginInUserDto){
-       return this.usersService.logIn(loginInUserDto);
+       const user =  this.usersService.logIn(loginInUserDto);
+
+       if(!user){
+        throw new UnauthorizedException();
+       }
+
+       return user;
      }
    
 }

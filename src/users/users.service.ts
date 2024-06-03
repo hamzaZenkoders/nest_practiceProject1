@@ -130,7 +130,7 @@ export class UsersService {
 
             
         if (!UserFound) {
-            throw new UnauthorizedException();
+          return null;
         }
         
        const passwordMatched = await bcrypt.compare(loginInUserDto.password,UserFound.password);
@@ -139,14 +139,15 @@ export class UsersService {
         throw new UnauthorizedException();
        }
 
-       const token = this.jwtSerice.sign({id:UserFound.name});
+       const { password, ...user } = UserFound;
+       const token = this.jwtSerice.sign({user});
 
        return {token};
 
     }
 
-    async findOne(id){
-        return this.userRepository.findOne(id);
+    async findOne(id: number){
+        return this.userRepository.findOne({ where: { id } });
     }
 
 }

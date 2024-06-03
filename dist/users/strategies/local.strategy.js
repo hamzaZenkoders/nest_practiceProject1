@@ -8,27 +8,28 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuthService = void 0;
+exports.LocalStrategy = void 0;
 const common_1 = require("@nestjs/common");
-const jwt_1 = require("@nestjs/jwt");
-const typeorm_1 = require("@nestjs/typeorm");
-const user_entity_1 = require("../users/entity/user.entity");
-const typeorm_2 = require("typeorm");
-let AuthService = class AuthService {
-    constructor(userRepository, jwtService) {
-        this.userRepository = userRepository;
-        this.jwtService = jwtService;
+const passport_1 = require("@nestjs/passport");
+const passport_local_1 = require("passport-local");
+const users_service_1 = require("../users.service");
+let LocalStrategy = class LocalStrategy extends (0, passport_1.PassportStrategy)(passport_local_1.Strategy) {
+    constructor(usersService) {
+        super();
+        this.usersService = usersService;
+    }
+    validate(email, password) {
+        console.log("Inside local strategy");
+        const user = this.usersService.logIn({ email, password });
+        if (!user)
+            throw new common_1.HttpException('Invalid Credentials', 401);
+        return user;
     }
 };
-exports.AuthService = AuthService;
-exports.AuthService = AuthService = __decorate([
+exports.LocalStrategy = LocalStrategy;
+exports.LocalStrategy = LocalStrategy = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        jwt_1.JwtService])
-], AuthService);
-//# sourceMappingURL=auth.service.js.map
+    __metadata("design:paramtypes", [users_service_1.UsersService])
+], LocalStrategy);
+//# sourceMappingURL=local.strategy.js.map
