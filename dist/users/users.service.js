@@ -5,85 +5,58 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
+const bcrypt = require("bcrypt");
+const typeorm_1 = require("@nestjs/typeorm");
+const user_entity_1 = require("./entity/user.entity");
+const typeorm_2 = require("typeorm");
+const jwt_1 = require("@nestjs/jwt");
 let UsersService = class UsersService {
-    constructor() {
-        this.users = [
-            {
-                "id": 1,
-                "name": "Leanne Graham",
-                "email": "Sincere@april.biz",
-                "role": "INTERN",
-            },
-            {
-                "id": 2,
-                "name": "Ervin Howell",
-                "email": "Shanna@melissa.tv",
-                "role": "Student",
-            },
-            {
-                "id": 3,
-                "name": "Clementine Bauch",
-                "email": "Nathan@yesenia.net",
-                "role": "ENGINEER",
-            },
-            {
-                "id": 4,
-                "name": "Patricia Lebsack",
-                "email": "Julianne.OConner@kory.org",
-                "role": "ENGINEER",
-            },
-            {
-                "id": 5,
-                "name": "Chelsey Dietrich",
-                "email": "Lucio_Hettinger@annie.ca",
-                "role": "Student",
-            }
-        ];
+    constructor(userRepository, jwtSerice) {
+        this.userRepository = userRepository;
+        this.jwtSerice = jwtSerice;
     }
-    findAll(role) {
-        if (role) {
-            const rolesArray = this.users.filter((user) => user.role === role);
-            if (rolesArray.length === 0)
-                throw new common_1.NotFoundException("User Role Not Found");
-            return rolesArray;
+    async register(createUserDto) {
+        const existingUser = await this.userRepository.findOne({ where: { email: createUserDto.email } });
+        if (existingUser) {
+            throw new common_1.HttpException('User already exists', common_1.HttpStatus.FORBIDDEN);
         }
-        return this.users;
+        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+        const newUser = await this.userRepository.create({ ...createUserDto, password: hashedPassword });
+        console.log(newUser);
+        const savedUser = await this.userRepository.save(newUser);
+        console.log('User saved to database:', savedUser);
+        return savedUser;
     }
-    findOne(id) {
-        const user = this.users.filter((user) => user.id === id);
-        if (user.length === 0)
-            throw new common_1.NotFoundException("User Not Found");
-        return user;
+    async logIn(loginInUserDto) {
+        const UserFound = await this.userRepository.findOne({ where: { email: loginInUserDto.email } });
+        if (!UserFound) {
+            throw new common_1.UnauthorizedException();
+        }
+        const passwordMatched = await bcrypt.compare(loginInUserDto.password, UserFound.password);
+        if (!passwordMatched) {
+            throw new common_1.UnauthorizedException();
+        }
+        const token = this.jwtSerice.sign({ id: UserFound.name });
+        return { token };
     }
-    create(createUserDto) {
-        const usersByHighestId = [...this.users].sort((a, b) => b.id - a.id);
-        const newUser = {
-            id: usersByHighestId[0].id + 1,
-            ...createUserDto
-        };
-        this.users.push(newUser);
-        return newUser;
-    }
-    update(id, updatedUserDto) {
-        this.users = this.users.map(user => {
-            if (user.id === id) {
-                return { ...user, ...updatedUserDto };
-            }
-            return user;
-        });
-        return this.findOne(id);
-    }
-    delete(id) {
-        const removedUser = this.findOne(id);
-        this.users = this.users.filter(user => user.id !== id);
-        return removedUser;
+    async findOne(id) {
+        return this.userRepository.findOne(id);
     }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        jwt_1.JwtService])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

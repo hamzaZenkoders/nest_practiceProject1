@@ -8,9 +8,12 @@ export class CreateUserDto {
     @IsEmail()
     email: string;
 
-    @IsEnum(['Teacher','Student','Admin'],{
-        message:"Provide a valid role"
-    })
+    @IsNotEmpty()
+    password:string;
 
-    role: 'Teacher' | 'Student' | 'Admin'
+  /*   @IsEnum(['Teacher','Student','Admin'],{
+        message:"Provide a valid role"
+    }) */
+
+  //  role: 'Teacher' | 'Student' | 'Admin'
 }
