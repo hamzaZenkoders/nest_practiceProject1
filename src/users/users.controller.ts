@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, ParseIntPipe, ValidationPipe, HttpException, HttpStatus, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, ParseIntPipe, ValidationPipe, HttpException, HttpStatus, UseGuards, UnauthorizedException, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user-dto';
 import { UpdateUserDto } from './dto/update-user-dto';
@@ -6,6 +6,9 @@ import { LoginInUserDto } from './dto/login-user-dto';
 //Simport { AuthGuard } from 'src/auth/auth.guard';
 import { Request } from 'express';
 import { AuthenticationGuard } from './guards/authentication.guards';
+import { AuthorizationGuard } from './guards/authorization.guards';
+import { Role } from 'src/decorators/roles.decorators';
+
 //import { LocalGuard } from './guards/authentication.guards';
 
 
@@ -42,10 +45,13 @@ export class UsersController {
  */
      //@UseGuards(AuthGuard)
 
-     @UseGuards(AuthenticationGuard)
+     @Role('admin')
+     @UseGuards(AuthenticationGuard,AuthorizationGuard )
      @Get(':id')
-     findOne(@Param('id', ParseIntPipe) id: number){
-      return this.usersService.findOne(id);
+     findOneUser(@Req() {user}, @Param('id', ParseIntPipe) id: number){
+        console.log(user);
+      const userFind =  this.usersService.findOne(id);
+      return userFind;
   }
      @Post('/signUp')
      signUp(@Body() user:CreateUserDto){
@@ -53,15 +59,8 @@ export class UsersController {
      }
 
      @Post('/signIn')
-
      signIn(@Body() loginInUserDto: LoginInUserDto){
-       const user =  this.usersService.logIn(loginInUserDto);
-
-       if(!user){
-        throw new UnauthorizedException();
-       }
-
-       return user;
+       return this.usersService.logIn(loginInUserDto);  
      }
    
 }

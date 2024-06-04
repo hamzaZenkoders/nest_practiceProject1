@@ -8,6 +8,10 @@ export class CreateUserDto {
     @IsEmail()
     email: string;
 
+ 
+    @IsString()
+    role: string;
+
     @IsNotEmpty()
     password:string;
 

@@ -29,8 +29,10 @@ let UsersService = class UsersService {
         if (existingUser) {
             throw new common_1.HttpException('User already exists', common_1.HttpStatus.FORBIDDEN);
         }
+        console.log(createUserDto);
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
         const newUser = await this.userRepository.create({ ...createUserDto, password: hashedPassword });
+        newUser.role = createUserDto.role;
         console.log(newUser);
         const savedUser = await this.userRepository.save(newUser);
         console.log('User saved to database:', savedUser);
@@ -38,19 +40,24 @@ let UsersService = class UsersService {
     }
     async logIn(loginInUserDto) {
         const UserFound = await this.userRepository.findOne({ where: { email: loginInUserDto.email } });
+        console.log("user checking", UserFound);
         if (!UserFound) {
-            return null;
+            throw new common_1.NotFoundException('User not found');
         }
         const passwordMatched = await bcrypt.compare(loginInUserDto.password, UserFound.password);
         if (!passwordMatched) {
             throw new common_1.UnauthorizedException();
         }
-        const { password, ...user } = UserFound;
-        const token = this.jwtSerice.sign({ user });
+        const payload = { email: UserFound.email, role: UserFound.role };
+        const token = this.jwtSerice.sign(payload);
         return { token };
     }
     async findOne(id) {
-        return this.userRepository.findOne({ where: { id } });
+        const user = await this.userRepository.findOne({ where: { id } });
+        if (!user) {
+            throw new common_1.UnauthorizedException();
+        }
+        return user;
     }
 };
 exports.UsersService = UsersService;

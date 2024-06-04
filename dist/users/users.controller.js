@@ -18,33 +18,35 @@ const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user-dto");
 const login_user_dto_1 = require("./dto/login-user-dto");
 const authentication_guards_1 = require("./guards/authentication.guards");
+const authorization_guards_1 = require("./guards/authorization.guards");
+const roles_decorators_1 = require("../decorators/roles.decorators");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
-    findOne(id) {
-        return this.usersService.findOne(id);
+    findOneUser({ user }, id) {
+        console.log(user);
+        const userFind = this.usersService.findOne(id);
+        return userFind;
     }
     signUp(user) {
         return this.usersService.register(user);
     }
     signIn(loginInUserDto) {
-        const user = this.usersService.logIn(loginInUserDto);
-        if (!user) {
-            throw new common_1.UnauthorizedException();
-        }
-        return user;
+        return this.usersService.logIn(loginInUserDto);
     }
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, common_1.UseGuards)(authentication_guards_1.AuthenticationGuard),
+    (0, roles_decorators_1.Role)('admin'),
+    (0, common_1.UseGuards)(authentication_guards_1.AuthenticationGuard, authorization_guards_1.AuthorizationGuard),
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [Object, Number]),
     __metadata("design:returntype", void 0)
-], UsersController.prototype, "findOne", null);
+], UsersController.prototype, "findOneUser", null);
 __decorate([
     (0, common_1.Post)('/signUp'),
     __param(0, (0, common_1.Body)()),

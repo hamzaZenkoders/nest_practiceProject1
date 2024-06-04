@@ -113,8 +113,10 @@ export class UsersService {
                 throw new HttpException('User already exists', HttpStatus.FORBIDDEN);
             }
 
+            console.log(createUserDto);
             const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
             const newUser = await this.userRepository.create({...createUserDto, password: hashedPassword});
+            newUser.role = createUserDto.role; 
             console.log(newUser);
             const savedUser = await this.userRepository.save(newUser);
 
@@ -127,11 +129,13 @@ export class UsersService {
     async logIn(loginInUserDto: LoginInUserDto){
 
         const UserFound = await this.userRepository.findOne({ where: { email: loginInUserDto.email } });
-
+        console.log("user checking",UserFound);
             
         if (!UserFound) {
-          return null;
+            throw new NotFoundException('User not found');
         }
+
+     
         
        const passwordMatched = await bcrypt.compare(loginInUserDto.password,UserFound.password);
        
@@ -139,15 +143,31 @@ export class UsersService {
         throw new UnauthorizedException();
        }
 
-       const { password, ...user } = UserFound;
-       const token = this.jwtSerice.sign({user});
+        
 
-       return {token};
+       //const { password, ...user } = UserFound;
+       //console.log("userrr controleerr", user);
+     //  const userWithRole = {...user,log}
+       //const token = this.jwtSerice.sign({user});
+
+       //return {token};
+     
+       const payload = { email: UserFound.email, role: UserFound.role}; // Include user's role in the payload
+       const token = this.jwtSerice.sign(payload);
+
+       return { token };
 
     }
 
     async findOne(id: number){
-        return this.userRepository.findOne({ where: { id } });
+       const user =  await this.userRepository.findOne({ where: { id } });
+
+
+       if(!user){
+        throw new UnauthorizedException();
+       }
+
+       return user;
     }
 
 }

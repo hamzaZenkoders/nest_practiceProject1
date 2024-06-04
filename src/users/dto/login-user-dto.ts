@@ -7,5 +7,10 @@ export class LoginInUserDto{
     email: string;
 
     @IsNotEmpty()
+    @IsString()
     password:string;
+/* 
+    @IsNotEmpty()
+    @IsString()
+    role:string;  */
 }
